@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:breez/bloc/tor/bloc.dart';
+
 import 'package:breez/bloc/account/account_actions.dart';
 import 'package:breez/bloc/account/account_permissions_handler.dart';
 import 'package:breez/bloc/account/fiat_conversion.dart';
@@ -132,6 +134,7 @@ class AccountBloc {
   Completer _onBoardingCompleter = Completer();
   Stream<BreezUserModel> userProfileStream;
   Completer<bool> startDaemonCompleter = Completer<bool>();
+  TorBloc _torBloc = TorBloc();
 
   AccountBloc(
     this.userProfileStream,
@@ -576,6 +579,18 @@ class AccountBloc {
       );
       _paymentsController.add(updatedPayments);
 
+      // Start tor
+      TorConfig torConfig;
+      final useTor = await _breezLib.isTorActive();
+      // FIXME(nochiel) Move this to a more reliable place.
+      log.info('AccountBloc: useTor : $useTor.');
+      if(useTor) {
+          torConfig = _torBloc.torConfig;
+          log.info('accountBloc.listenUserChanges: using tor');
+          torConfig ??= await _torBloc.startTor();
+          assert(torConfig != null);
+      }
+
       //start lightning
       if (user.registrationRequested) {
         if (!_startedLightning) {
@@ -588,7 +603,7 @@ class AccountBloc {
           });
           log.info("account: starting lightning...");
           try {
-            await _breezLib.startLightning();
+            await _breezLib.startLightning(torConfig);
             log.info("account: lightning started");
             if (user.token != null) {
               _breezLib.registerPeriodicSync(user.token);
@@ -599,6 +614,7 @@ class AccountBloc {
             _listenRefundableDeposits();
             _updateExchangeRates();
             _listenRefundBroadcasts();
+
           } catch (e) {
             _lightningDownController.add(false);
           }
