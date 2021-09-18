@@ -134,7 +134,7 @@ class AccountBloc {
   Completer _onBoardingCompleter = Completer();
   Stream<BreezUserModel> userProfileStream;
   Completer<bool> startDaemonCompleter = Completer<bool>();
-  TorBloc _torBloc = TorBloc();
+  TorBloc torBloc = TorBloc();
 
   AccountBloc(
     this.userProfileStream,
@@ -584,14 +584,11 @@ class AccountBloc {
       final useTor = await _breezLib.getTorActive();
       log.info('AccountBloc: useTor : $useTor.');
       if (useTor) {
-        torConfig = _torBloc.torConfig;
-        log.info('accountBloc.listenUserChanges: using tor');
+        torConfig = torBloc.torConfig;
+        log.info('accountBloc.listenUserChanges: using Tor');
         try {
-          torConfig ??= await _torBloc.startTor();
+          torConfig ??= await torBloc.startTor();
         } catch (e) {
-          // TODO(nochiel) Maybe instead of offering the user an option in unexpected_error_handling.dart
-          // to disable Tor themselves and restart, it might be okay to disable Tor and ask them to restart?
-          // await _breezLib.enableOrDisableTor(false);
           _lightningDownController.add(false);
         }
         assert(torConfig != null);

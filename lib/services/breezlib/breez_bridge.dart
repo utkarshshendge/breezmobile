@@ -686,6 +686,11 @@ class BreezBridge {
     }
   }
 
+  Future testBackupAuth(String provider, String authData) {
+    return _methodChannel.invokeMethod(
+        'testBackupAuth', {'provider': provider, 'authData': authData});
+  }
+
   Future<dynamic> signIn(bool force) {
     return _methodChannel.invokeMethod("signIn", {"force": force});
   }
@@ -746,6 +751,9 @@ class BreezBridge {
           .invokeMethod(methodName, arguments)
           .catchError((err) {
         if (err.runtimeType == PlatformException) {
+          print(
+              "Error in calling method '$methodName' with arguments: $arguments.");
+          print("Error in calling method '$methodName' with error: $err.");
           throw (err as PlatformException).message;
         }
         throw err;
@@ -759,7 +767,8 @@ class BreezBridge {
           .invokeMethod(methodName, arguments)
           .catchError((err) {
         if (err.runtimeType == PlatformException) {
-          print("Error in calling method '$methodName' with arguments: $arguments.");
+          print(
+              "Error in calling method '$methodName' with arguments: $arguments.");
           print("Error in calling method '$methodName' with error: $err.");
           throw (err as PlatformException).message;
         }
