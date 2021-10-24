@@ -23,6 +23,7 @@ fileprivate let calls : Dictionary<String, BindingExecutor> = [
     "restartDaemon": EmptyArgsBindingExecutor(f: BindingsRestartDaemon),
     "getTorActive": VoidBindingExecutor(f: BindingsGetTorActive),
     "setTorActive": SingleArgBindingExecutor(f: BindingsSetTorActive),
+    "setBackupTorConfig": SingleArgBindingExecutor(f: BindingsSetBackupTorConfig),
     
     "lastSyncedHeaderTimestamp": VoidBindingExecutor(f: BindingsLastSyncedHeaderTimestamp),
     "addFundsInit": SingleArgBindingExecutor(f: BindingsAddFundsInit),

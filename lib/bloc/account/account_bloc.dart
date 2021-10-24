@@ -588,6 +588,7 @@ class AccountBloc {
         log.info('accountBloc.listenUserChanges: using Tor');
         try {
           torConfig ??= await torBloc.startTor();
+          _breezLib.setBackupTorConfig(torConfig);
         } catch (e) {
           _lightningDownController.add(false);
         }

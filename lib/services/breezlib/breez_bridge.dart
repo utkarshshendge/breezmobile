@@ -664,6 +664,11 @@ class BreezBridge {
         {"provider": backupProvider, "authData": backupAuthData});
   }
 
+  Future setBackupTorConfig(TorConfig torConfig) {
+    return _invokeMethodImmediate(
+        "setBackupTorConfig", {"argument": torConfig?.writeToBuffer()});
+  }
+
   Future<String> getAvailableBackups() async {
     await signIn(true);
     return await _methodChannel
@@ -738,7 +743,7 @@ class BreezBridge {
   }
 
   Future setTorActive(bool enabled) {
-    return _invokeMethodWhenReady('setTorActive', {'argument': enabled});
+    return _invokeMethodImmediate('setTorActive', {'argument': enabled});
   }
 
   Future<bool> getTorActive() {
