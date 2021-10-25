@@ -71,33 +71,36 @@ class BackupProviderSelectionDialogState
                     shrinkWrap: false,
                     itemCount: providers.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return ListTile(
-                        contentPadding: EdgeInsets.symmetric(horizontal: 0.0),
-                        selected: _selectedProviderIndex == index,
-                        trailing: _selectedProviderIndex == index
-                            ? Icon(
-                                Icons.check,
-                                color: Theme.of(context)
-                                    .primaryTextTheme
-                                    .button
-                                    .color,
-                              )
-                            : Icon(Icons.check,
-                                color: Theme.of(context).backgroundColor),
-                        title: Text(
-                          providers[index].displayName,
-                          style: Theme.of(context)
-                              .dialogTheme
-                              .titleTextStyle
-                              .copyWith(
-                                  fontSize: 14.3,
-                                  height: 1.2), // Color needs to change
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _selectedProviderIndex = index;
-                          });
-                        },
+                      return SizedBox(
+                        height: 36,
+                        child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 0.0),
+                          selected: _selectedProviderIndex == index,
+                          trailing: _selectedProviderIndex == index
+                              ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context)
+                                      .primaryTextTheme
+                                      .button
+                                      .color,
+                                )
+                              : Icon(Icons.check,
+                                  color: Theme.of(context).backgroundColor),
+                          title: Text(
+                            providers[index].displayName,
+                            style: Theme.of(context)
+                                .dialogTheme
+                                .titleTextStyle
+                                .copyWith(
+                                    fontSize: 14.3,
+                                    height: 1.2), // Color needs to change
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _selectedProviderIndex = index;
+                            });
+                          },
+                        )
                       );
                     },
                   ),
