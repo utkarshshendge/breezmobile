@@ -177,6 +177,7 @@ class PodcastPaymentsBloc with AsyncActionsHandler {
     String boostMessage = "",
     String senderName = "",
   }) async {
+    int netPaySplitSum = 0;
     if (breezReceiverNode == null) {
       try {
         breezReceiverNode = await _breezLib.receiverNode();
@@ -217,8 +218,7 @@ class PodcastPaymentsBloc with AsyncActionsHandler {
       return;
     }
     paidPositions[paidPositionKey] = true;
-
-    withBreez.forEach((d) async {
+    final podcastPaymentFutures = withBreez.map((d) async {
       final amount = (d.split * total / totalSplits);
       var payPart = amount.toInt();
       if (!boost) {
@@ -238,7 +238,7 @@ class PodcastPaymentsBloc with AsyncActionsHandler {
         if (!boost) {
           await _aggregatedPayments.addAmount(d.address, -payPart.toDouble());
         }
-        _breezLib
+        return _breezLib
             .sendSpontaneousPayment(d.address, Int64(netPay), d.name,
                 feeLimitMsat: maxFee,
                 groupKey: _getPodcastGroupKey(episode),
@@ -264,15 +264,7 @@ class PodcastPaymentsBloc with AsyncActionsHandler {
             return;
           }
           log.info("succesfully paid $netPay to destination ${d.address}");
-
-          _addToPodcastHistory(
-              podcastId: episode.metadata["feed"]["id"].toString(),
-              podcastName: episode.metadata["feed"]["title"],
-              podcastImageUrl: episode.metadata["feed"]["image"],
-              podcastUrl: episode.metadata["feed"]["originalUrl"],
-              satsSpent: netPay,
-              durationInMins: 0,
-              isBoost: boost);
+          netPaySplitSum = netPaySplitSum + netPay;
 
           if (!boost) {
             _paymentEventsController
@@ -287,6 +279,19 @@ class PodcastPaymentsBloc with AsyncActionsHandler {
         });
       }
     });
+
+    await Future.wait(podcastPaymentFutures);
+
+    if (netPaySplitSum > 0) {
+      _addToPodcastHistory(
+          podcastId: episode.metadata["feed"]["id"].toString(),
+          podcastName: episode.metadata["feed"]["title"],
+          podcastImageUrl: episode.metadata["feed"]["image"],
+          podcastUrl: episode.metadata["feed"]["originalUrl"],
+          satsSpent: netPaySplitSum,
+          durationInMins: 0.0,
+          isBoost: boost);
+    }
   }
 
   Future<Value> _getLightningPaymentValue(Episode episode) async {
